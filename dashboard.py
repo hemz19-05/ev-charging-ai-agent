@@ -308,7 +308,7 @@ with col2:
     chat_container = st.container()
 
     with chat_container:
-        for msg in st.session_state["messages"][-10:]:  # show last 10
+        for msg in st.session_state["messages"][-10:]:  
             role, content = msg["role"], msg["content"]
             if role == "user":
                 st.markdown(f"<div class='chat-bubble-user'>{content}</div>", unsafe_allow_html=True)
@@ -328,11 +328,13 @@ with col2:
         st.rerun()
 
     if ask and user_input:
-        st.session_state["messages"].append({"role": "user", "content": user_input})
+        if "last_input" not in st.session_state or st.session_state["last_input"] != user_input:
+            st.session_state["last_input"] = user_input
+            st.session_state["messages"].append({"role": "user", "content": user_input})
 
-        query_result = ''
+            query_result = ''
         
-        # Try to get database info, but don't crash if it fails
+
         try:
             engine = connect_db()
             with engine.connect() as conn:
@@ -342,11 +344,11 @@ with col2:
                 elif 'predict' in user_input.lower():
                     query_result = "I can provide predictions based on stored or example EV data."
         except Exception as e:
-            # If database fails, continue without it
+
             query_result = "Database temporarily unavailable."
             print(f"Database error: {e}")
 
-        # This will now run even if database fails
+
         messages = [
             {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
         ] + st.session_state["messages"][-10:] + [
