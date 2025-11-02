@@ -1,7 +1,10 @@
 services:
-  - type: web
-    name: ev-charging-ai-agent
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run dashboard.py --server.port $PORT
-    pythonVersion: 3.10.14
+     - type: web
+       name: ev-charging-ai-agent
+       env: python
+       pythonVersion: "3.10.14"
+       buildCommand: pip install -r requirements.txt
+       startCommand: streamlit run dashboard.py --server.port $PORT
+       envVars:
+         - key: DISABLE_POETRY
+           value: "1"
