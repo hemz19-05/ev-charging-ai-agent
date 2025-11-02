@@ -9,7 +9,7 @@ import os
 
 
 load_dotenv()
-client = OpenAI()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
