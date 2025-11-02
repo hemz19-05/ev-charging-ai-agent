@@ -317,22 +317,23 @@ with col2:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    c1, c2 = st.columns([5, 1])
+ c1, c2 = st.columns([5, 1])
     with c1:
-        user_input = st.text_input("💬 You:", placeholder="Ask me about your EV data or predictions...")
+        user_input = st.text_input("💬 You:", key="user_input_box", placeholder="Ask me about your EV data or predictions...")
     with c2:
         ask = st.button("Ask")
 
     if st.button("🧹 Clear Chat"):
         st.session_state["messages"] = []
+        st.session_state.pop("processing", None)
         st.rerun()
 
-    if ask and user_input:
-        if "last_input" not in st.session_state or st.session_state["last_input"] != user_input:
-            st.session_state["last_input"] = user_input
-            st.session_state["messages"].append({"role": "user", "content": user_input})
 
-            query_result = ''
+    if ask and user_input and "processing" not in st.session_state:
+        st.session_state["processing"] = True
+        st.session_state["messages"].append({"role": "user", "content": user_input})
+
+        query_result = ''
         
 
         try:
@@ -344,11 +345,11 @@ with col2:
                 elif 'predict' in user_input.lower():
                     query_result = "I can provide predictions based on stored or example EV data."
         except Exception as e:
-
+        
             query_result = "Database temporarily unavailable."
             print(f"Database error: {e}")
 
-
+        
         messages = [
             {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
         ] + st.session_state["messages"][-10:] + [
@@ -359,4 +360,5 @@ with col2:
         reply = response.choices[0].message.content
 
         st.session_state["messages"].append({"role": "assistant", "content": reply})
+        st.session_state.pop("processing", None)
         st.rerun()
