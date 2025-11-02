@@ -285,7 +285,7 @@ with col2:
     st.subheader("🤖 AI Assistant Chat")
 
 
-    chat_container = st.container(height=450, border=True)
+    chat_container = st.container(border=True)
 
     with chat_container:
         for msg in st.session_state["messages"][-10:]:  # show last 10
