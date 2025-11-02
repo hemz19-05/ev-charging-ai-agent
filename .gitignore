@@ -4,3 +4,15 @@ __pycache__/
 #*.pkl
 *.sqlite3
 .DS_Store
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
