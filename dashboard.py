@@ -284,8 +284,23 @@ with col1:
 with col2:
     st.subheader("🤖 AI Assistant Chat")
 
+    st.markdown("""
+        <style>
+        .chat-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 450px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-    chat_container = st.container(border=True)
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+
+    chat_container = st.container()
 
     with chat_container:
         for msg in st.session_state["messages"][-10:]:  # show last 10
@@ -295,6 +310,8 @@ with col2:
             else:
                 st.markdown(f"<div class='chat-bubble-ai'>{content}</div>", unsafe_allow_html=True)
 
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     c1, c2 = st.columns([5, 1])
     with c1:
         user_input = st.text_input("💬 You:", placeholder="Ask me about your EV data or predictions...")
