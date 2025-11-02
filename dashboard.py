@@ -360,12 +360,10 @@ with col2:
 
     if st.button("🧹 Clear Chat"):
         st.session_state["messages"] = []
-        st.session_state.pop("processing", None)
         st.rerun()
 
 
     if ask and user_input and "processing" not in st.session_state:
-        st.session_state["processing"] = True
         st.session_state["messages"].append({"role": "user", "content": user_input})
 
         query_result = ''
@@ -395,4 +393,3 @@ with col2:
             reply = response.choices[0].message.content
 
         st.session_state["messages"].append({"role": "assistant", "content": reply})
-        st.session_state.pop("processing", None)
