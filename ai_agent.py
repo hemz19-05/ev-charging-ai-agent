@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-client = OpenAI()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def connect_db():
     engine = create_engine("postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db")

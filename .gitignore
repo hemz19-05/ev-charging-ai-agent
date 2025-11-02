@@ -1,6 +1,6 @@
 # Ignore environment and sensitive files
 .env
 __pycache__/
-*.pkl
+#*.pkl
 *.sqlite3
 .DS_Store
