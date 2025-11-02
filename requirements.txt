@@ -1,0 +1,11 @@
+streamlit==1.38.0
+pandas
+numpy
+scikit-learn==1.2.2
+xgboost
+joblib
+streamlit
+psycopg2-binary
+SQLAlchemy
+python-dotenv
+openai
