@@ -369,30 +369,30 @@ with col2:
         st.session_state["messages"].append({"role": "user", "content": user_input})
 
         query_result = ''
+    
+
+        with st.spinner("🤔 Thinking..."):
+            try:
+                engine = connect_db()
+                with engine.connect() as conn:
+                    if 'average' in user_input.lower() or 'total' in user_input.lower():
+                        df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
+                        query_result = f"Average cost: {df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
+                    elif 'predict' in user_input.lower():
+                        query_result = "I can provide predictions based on stored or example EV data."
+            except Exception as e:
+                query_result = "Database temporarily unavailable."
+                print(f"Database error: {e}")
+
         
+            messages = [
+                {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
+            ] + st.session_state["messages"][-10:] + [
+                {"role": "user", "content": f"User asked: {user_input}. Data retrieved: {query_result}"}
+            ]
 
-    with st.spinner("🤔 Thinking..."):
-        try:
-            engine = connect_db()
-            with engine.connect() as conn:
-                if 'average' in user_input.lower() or 'total' in user_input.lower():
-                    df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
-                    query_result = f"Average cost: {df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
-                elif 'predict' in user_input.lower():
-                    query_result = "I can provide predictions based on stored or example EV data."
-        except Exception as e:
-            query_result = "Database temporarily unavailable."
-            print(f"Database error: {e}")
-
-        
-        messages = [
-            {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
-        ] + st.session_state["messages"][-10:] + [
-            {"role": "user", "content": f"User asked: {user_input}. Data retrieved: {query_result}"}
-        ]
-
-        response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
-        reply = response.choices[0].message.content
+            response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+            reply = response.choices[0].message.content
 
         st.session_state["messages"].append({"role": "assistant", "content": reply})
         st.session_state.pop("processing", None)
