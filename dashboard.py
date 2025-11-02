@@ -16,7 +16,12 @@ if "messages" not in st.session_state:
 
 
 def connect_db():
-    engine = create_engine("postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db")
+    database_url = os.getenv("DATABASE_URL")
+    
+    if not database_url:
+        database_url = "postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db"
+    
+    engine = create_engine(database_url)
     return engine
 
 
@@ -311,7 +316,7 @@ with col2:
                 st.markdown(f"<div class='chat-bubble-ai'>{content}</div>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
-    
+
     c1, c2 = st.columns([5, 1])
     with c1:
         user_input = st.text_input("💬 You:", placeholder="Ask me about your EV data or predictions...")
