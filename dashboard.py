@@ -240,20 +240,23 @@ with col1:
     st.subheader("🔋 Predict Your Charging Cost")
     st.write("Enter the charging session details below:")
 
-    capacity = st.number_input('Battery Capacity (kWh)', min_value=10.0, step=1.0)
-    duration = st.number_input('Charging duration (hours)', min_value=0.1, step=0.1)
-    rate = st.number_input('Charging Rate (kW)', min_value=1.0, step=0.5)
-    soc_start = st.number_input('State of Charge (Start %)', min_value=0, max_value=100, step=1)
-    soc_end = st.number_input('State of Charge (End %)', min_value=0, max_value=100, step=1)
-    temp = st.number_input('Temperature (°C)', min_value=-20.0, max_value=50.0, step=0.5)
-    age = st.number_input('Vehicle Age (years)', min_value=0, max_value=20, step=1)
-    model_choice = st.selectbox('Vehicle Model', ['Tesla Model 3', 'Hyundai Kona', 'Chevy Bolt', 'BMW i3', 'Nissan Leaf', 'Others'])
-    user_type = st.selectbox('User Type', ['Commuter', 'Long-Distance Traveler', 'Casual Driver'])
-    charger_type = st.selectbox('Charger Type', ['DC Fast Charger', 'Level 1', 'Level 2'])
-    distance = st.number_input('Distance Driven (since last charge) (km)', min_value=0.0, step=1.0)
-    energy = st.number_input('Energy Consumed (kWh)', min_value=0.1, step=0.1)
+    with st.form('prediction_form'):
+        capacity = st.number_input('Battery Capacity (kWh)', min_value=10.0, step=1.0)
+        duration = st.number_input('Charging duration (hours)', min_value=0.1, step=0.1)
+        rate = st.number_input('Charging Rate (kW)', min_value=1.0, step=0.5)
+        soc_start = st.number_input('State of Charge (Start %)', min_value=0, max_value=100, step=1)
+        soc_end = st.number_input('State of Charge (End %)', min_value=0, max_value=100, step=1)
+        temp = st.number_input('Temperature (°C)', min_value=-20.0, max_value=50.0, step=0.5)
+        age = st.number_input('Vehicle Age (years)', min_value=0, max_value=20, step=1)
+        model_choice = st.selectbox('Vehicle Model', ['Tesla Model 3', 'Hyundai Kona', 'Chevy Bolt', 'BMW i3', 'Nissan Leaf', 'Others'])
+        user_type = st.selectbox('User Type', ['Commuter', 'Long-Distance Traveler', 'Casual Driver'])
+        charger_type = st.selectbox('Charger Type', ['DC Fast Charger', 'Level 1', 'Level 2'])
+        distance = st.number_input('Distance Driven (since last charge) (km)', min_value=0.0, step=1.0)
+        energy = st.number_input('Energy Consumed (kWh)', min_value=0.1, step=0.1)
 
-    if st.button("Predict Cost"):
+        submitted = st.form_submit_button("Predict Cost")
+
+    if submitted:
         user_data = {
             "Battery Capacity (kWh)": capacity,
             "Charging Duration (hours)": duration,
