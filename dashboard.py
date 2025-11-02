@@ -317,7 +317,7 @@ with col2:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
- c1, c2 = st.columns([5, 1])
+    c1, c2 = st.columns([5, 1])
     with c1:
         user_input = st.text_input("💬 You:", key="user_input_box", placeholder="Ask me about your EV data or predictions...")
     with c2:
