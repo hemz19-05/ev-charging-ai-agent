@@ -330,22 +330,28 @@ with col2:
     if ask and user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
 
-        engine = connect_db()
         query_result = ''
+        
+        # Try to get database info, but don't crash if it fails
+        try:
+            engine = connect_db()
+            with engine.connect() as conn:
+                if 'average' in user_input.lower() or 'total' in user_input.lower():
+                    df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
+                    query_result = f"Average cost: {df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
+                elif 'predict' in user_input.lower():
+                    query_result = "I can provide predictions based on stored or example EV data."
+        except Exception as e:
+            # If database fails, continue without it
+            query_result = "Database temporarily unavailable."
+            print(f"Database error: {e}")
 
-        with engine.connect() as conn:
-            if 'average' in user_input.lower() or 'total' in user_input.lower():
-                df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
-                query_result = f"Average cost: {df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
-            elif 'predict' in user_input.lower():
-                query_result = "I can provide predictions based on stored or example EV data."
-
+        # This will now run even if database fails
         messages = [
             {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
         ] + st.session_state["messages"][-10:] + [
             {"role": "user", "content": f"User asked: {user_input}. Data retrieved: {query_result}"}
         ]
-
 
         response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
         reply = response.choices[0].message.content
