@@ -371,6 +371,7 @@ with col2:
         query_result = ''
         
 
+    with st.spinner("🤔 Thinking..."):
         try:
             engine = connect_db()
             with engine.connect() as conn:
@@ -380,7 +381,6 @@ with col2:
                 elif 'predict' in user_input.lower():
                     query_result = "I can provide predictions based on stored or example EV data."
         except Exception as e:
-        
             query_result = "Database temporarily unavailable."
             print(f"Database error: {e}")
 
