@@ -7,27 +7,35 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import os
 
-
-
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Initialize session state for messages
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-
-def connect_db():
+@st.cache_resource
+def get_engine():
+    """Create and cache the database engine."""
     database_url = os.getenv("DATABASE_URL")
-    
     if not database_url:
         database_url = "postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db"
-    
-    engine = create_engine(database_url)
-    return engine
+    return create_engine(database_url)
+
+def connect_db():
+    """Get database engine (wrapper for compatibility)."""
+    return get_engine()
+
+@st.cache_resource(show_spinner=False)
+def load_model():
+    """Load and cache the cost prediction model."""
+    return joblib.load('ev_cost_model.pkl')
+
+model = load_model()
 
 def ensure_table_exists():
     try:
-        engine = connect_db()
+        engine = get_engine()
         create_table_query = """
         CREATE TABLE IF NOT EXISTS ev_predictions (
             id SERIAL PRIMARY KEY,
@@ -53,16 +61,11 @@ def ensure_table_exists():
     except Exception as e:
         print(f"Table creation error: {e}")
 
-
-model = joblib.load('ev_cost_model.pkl')
-
 ensure_table_exists()
-
-
 
 st.set_page_config(page_title="⚡ EV Charging Assistant", layout="wide")
 
-
+@st.cache_data
 def set_bg_local(image_file):
     import base64
     with open(image_file, "rb") as f:
@@ -222,20 +225,13 @@ def set_bg_local(image_file):
         unsafe_allow_html=True
     )
 
-
-
 set_bg_local("background1.jpg")
-
-
 
 st.markdown("<h1 style='text-align: center;'>⚡ EV Charging Cost Prediction + AI Assistant</h1>", unsafe_allow_html=True)
 
-
 col1, col2 = st.columns([1.2, 0.8])
 
-
 # COLUMN 1 — Prediction Section
-
 with col1:
     st.subheader("🔋 Predict Your Charging Cost")
     st.write("Enter the charging session details below:")
@@ -276,7 +272,6 @@ with col1:
         prediction = model.predict(X)[0]
         st.success(f"💰 Estimated Charging Cost: **${prediction:.2f}**")
 
-
         try:
             engine = connect_db()
             with engine.connect() as conn:
@@ -296,8 +291,7 @@ with col1:
                 conn.commit()
             st.info("✅ Prediction stored in the database successfully!")
         except Exception as e:
-            st.error(f"⚠️ Database Error: {e}")
-
+            st.warning("⚠️ Could not store prediction in database")
 
         explanation_prompt = f"""
         Explain in one paragraph why the predicted EV charging cost is ${prediction:.2f}, 
@@ -317,10 +311,7 @@ with col1:
         ai_explanation = response.choices[0].message.content
         st.markdown(f"**🤖 Why this cost?** {ai_explanation}")
 
-
-
 # COLUMN 2 — AI Assistant Chat
-
 with col2:
     st.subheader("🤖 AI Assistant Chat")
 
@@ -358,16 +349,14 @@ with col2:
     with c2:
         ask = st.button("Ask")
 
-    if st.button("🧹 Clear Chat"):
+    if st.button("🧹 Clear Chat", key="clear_chat_btn"):
         st.session_state["messages"] = []
         st.rerun()
 
-
-    if ask and user_input and "processing" not in st.session_state:
+    if ask and user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
 
         query_result = ''
-    
 
         with st.spinner("🤔 Thinking..."):
             try:
@@ -380,9 +369,7 @@ with col2:
                         query_result = "I can provide predictions based on stored or example EV data."
             except Exception as e:
                 query_result = "Database temporarily unavailable."
-                print(f"Database error: {e}")
 
-        
             messages = [
                 {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
             ] + st.session_state["messages"][-10:] + [
