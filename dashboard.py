@@ -3,9 +3,10 @@ import pandas as pd
 import joblib
 from openai import OpenAI
 from preprocessing import preprocess_input
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import os
+
 
 
 load_dotenv()
@@ -24,8 +25,39 @@ def connect_db():
     engine = create_engine(database_url)
     return engine
 
+def ensure_table_exists():
+    try:
+        engine = connect_db()
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS ev_predictions (
+            id SERIAL PRIMARY KEY,
+            distance_km FLOAT,
+            energy_kwh FLOAT,
+            duration_hours FLOAT,
+            battery_capacity FLOAT,
+            charging_rate FLOAT,
+            soc_start INTEGER,
+            soc_end INTEGER,
+            temperature FLOAT,
+            vehicle_age INTEGER,
+            vehicle_model VARCHAR(100),
+            charger_type VARCHAR(100),
+            user_type VARCHAR(100),
+            predicted_cost FLOAT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+        with engine.connect() as conn:
+            conn.execute(text(create_table_query))
+            conn.commit()
+    except Exception as e:
+        print(f"Table creation error: {e}")
+
 
 model = joblib.load('ev_cost_model.pkl')
+
+ensure_table_exists()
+
 
 
 st.set_page_config(page_title="⚡ EV Charging Assistant", layout="wide")
@@ -361,4 +393,3 @@ with col2:
 
         st.session_state["messages"].append({"role": "assistant", "content": reply})
         st.session_state.pop("processing", None)
-        st.rerun()
