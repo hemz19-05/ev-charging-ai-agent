@@ -1,18 +1,35 @@
-# Ignore environment and sensitive files
+# Environment & sensitive files
 .env
-__pycache__/
-#*.pkl
-*.sqlite3
-.DS_Store
+*.key
+*.pem
+*.json
+*.ini
 
-# Virtual environment
+# Cache & compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
 .venv/
 venv/
 env/
 ENV/
 
-# Python
-*.pyc
-*.pyo
-*.pyd
-.Python
+# System files
+.DS_Store
+
+# Databases & local data
+*.sqlite3
+*.db
+
+# Model files (optional — unless you need them for deployment)
+*.pkl
+
+# Logs
+*.log
+
+# Temporary folders
+tmp/
