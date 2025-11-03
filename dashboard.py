@@ -389,4 +389,3 @@ with col2:
         st.session_state["messages"].append({"role": "assistant", "content": reply})
         
 
-        st.rerun()
