@@ -7,10 +7,12 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 
-
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+
+if "ai_messages" not in st.session_state:
+    st.session_state["ai_messages"] = []
 
 @st.cache_resource
 def get_engine():
@@ -26,7 +28,6 @@ def load_model():
     return joblib.load('ev_cost_model.pkl')
 
 model = load_model()
-
 
 st.set_page_config(page_title="⚡ EV Charging AI Assistant", page_icon="⚡")
 st.title("⚡ EV Charging AI Assistant")
@@ -44,55 +45,74 @@ This intelligent assistant can:
 """)
 
 
-user_input = st.text_input("You:", placeholder="Ask me something about EV charging...")
+st.subheader("💬 Conversation")
+for msg in st.session_state["ai_messages"]:
+    if msg["role"] == "user":
+        st.markdown(f"**You:** {msg['content']}")
+    else:
+        st.markdown(f"**🤖 Assistant:** {msg['content']}")
+
+
+if st.button("🧹 Clear Conversation"):
+    st.session_state["ai_messages"] = []
+    st.rerun()
+
+
+user_input = st.text_input("You:", placeholder="Ask me something about EV charging...", key="user_input_field")
 
 if user_input:
+    # Add user message to history
+    st.session_state["ai_messages"].append({"role": "user", "content": user_input})
+    
+    query_result = ''
+    
     try:
         engine = get_engine()
+        
+        with engine.connect() as conn:
+            if 'average' in user_input.lower() or 'total' in user_input.lower():
+                df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
+                if not df.empty:
+                    query_result = f"Average cost: ${df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
+                else:
+                    query_result = "No predictions stored in database yet."
+
+            elif 'predict' in user_input.lower():
+                example_data = {
+                    'Battery Capacity (kWh)': 50,
+                    'Charging Duration (hours)': 2,
+                    'Charging Rate (kW)': 11,
+                    'State of Charge (Start %)': 30,
+                    'State of Charge (End %)': 90,
+                    'Temperature (°C)': 25,
+                    'Vehicle Age (years)': 3,
+                    'Vehicle Model': 'Tesla Model 3',
+                    'Charger Type': 'Level 2',
+                    'User Type': 'Commuter',
+                    'Distance Driven (since last charge) (km)': 150,
+                    'Energy Consumed (kWh)': 30
+                }
+
+                X = preprocess_input(example_data)
+                prediction = model.predict(X)[0]
+                query_result = f'Predicted charging cost for Tesla Model 3: ${prediction:.2f}'
+                
     except Exception as e:
-        st.error(f"⚠️ Database connection failed: {e}")
-        engine = None
+        query_result = "Database temporarily unavailable. I can still answer general questions about EV charging!"
+        st.warning(f"⚠️ Database connection issue")
 
-    query_result = ''
-
-    if engine:
-        try:
-            with engine.connect() as conn:
-                if 'average' in user_input.lower() or 'total' in user_input.lower():
-                    df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
-                    query_result = f"Average cost: {df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
-
-                elif 'predict' in user_input.lower():
-                    example_data = {
-                        'Battery Capacity (kWh)': 50,
-                        'Charging Duration (hours)': 2,
-                        'Charging Rate (kW)': 11,
-                        'State of Charge (Start %)': 30,
-                        'State of Charge (End %)': 90,
-                        'Temperature (°C)': 25,
-                        'Vehicle Age (years)': 3,
-                        'Vehicle Model': 'Tesla Model 3',
-                        'Charger Type': 'Level 2',
-                        'User Type': 'Commuter',
-                        'Distance Driven (since last charge) (km)': 150,
-                        'Energy Consumed (kWh)': 30
-                    }
-
-                    X = preprocess_input(example_data)
-                    prediction = model.predict(X)[0]
-                    query_result = f'Predicted charging cost: ${prediction:.2f}'
-        except Exception as e:
-            query_result = f"⚠️ Database query failed: {e}"
-
-
+    # Create messages for OpenAI with conversation history
     with st.spinner("🤖 Thinking..."):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are an EV charging assistant that explains data in a friendly, helpful way."},
-                {"role": "user", "content": f"User asked: {user_input}\nData retrieved: {query_result}"}
-            ]
-        )
+        messages = [
+            {"role": "system", "content": "You are an EV charging assistant that explains data in a friendly, helpful way."}
+        ] + st.session_state["ai_messages"][-10:] + [  # Keep last 10 messages for context
+            {"role": "user", "content": f"Additional context - Data retrieved: {query_result}"}
+        ]
+        
+        response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+        reply = response.choices[0].message.content
+    
+    st.session_state["ai_messages"].append({"role": "assistant", "content": reply})
+    
 
-    reply = response.choices[0].message.content
-    st.markdown(f"**🤖 Assistant:** {reply}")
+    st.rerun()
