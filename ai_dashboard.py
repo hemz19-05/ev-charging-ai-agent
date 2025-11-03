@@ -7,6 +7,8 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 
+st.set_page_config(page_title="⚡ EV Charging AI Assistant", page_icon="⚡")
+
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -29,7 +31,7 @@ def load_model():
 
 model = load_model()
 
-st.set_page_config(page_title="⚡ EV Charging AI Assistant", page_icon="⚡")
+
 st.title("⚡ EV Charging AI Assistant")
 
 st.markdown("""
