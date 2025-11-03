@@ -312,7 +312,13 @@ with col1:
         )
 
         ai_explanation = response.choices[0].message.content
-        st.markdown(f"**🤖 Why this cost?** {ai_explanation}")
+
+        st.markdown(f"""
+        <div style='background-color: rgba(17, 34, 64, 0.8); padding: 15px; border-radius: 10px; margin-top: 10px;'>
+        <strong style='color: #00FF88;'>🤖 Why this cost?</strong>
+        <p style='color: white; margin-top: 10px; line-height: 1.6;'>{ai_explanation}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # COLUMN 2 — AI Assistant Chat
