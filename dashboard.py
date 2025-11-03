@@ -12,7 +12,7 @@ st.set_page_config(page_title="⚡ EV Charging Assistant", layout="wide")
 # Initialize session state for messages
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
-    
+
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -67,7 +67,6 @@ def ensure_table_exists():
 
 ensure_table_exists()
 
-st.set_page_config(page_title="⚡ EV Charging Assistant", layout="wide")
 
 @st.cache_data
 def set_bg_local(image_file):
