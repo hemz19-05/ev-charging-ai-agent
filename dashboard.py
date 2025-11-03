@@ -7,12 +7,16 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+st.set_page_config(page_title="⚡ EV Charging Assistant", layout="wide")
 
 # Initialize session state for messages
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
+    
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
 
 @st.cache_resource
 def get_engine():
