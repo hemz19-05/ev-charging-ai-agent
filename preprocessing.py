@@ -11,7 +11,7 @@ def map_vehicle_model(model_name):
     if model_name in known_models:
         return model_name
     else:
-        return 'BMW i3'  
+        return 'BMW i3'   #baseline model
     
 def preprocess_input(data_dict):
 
