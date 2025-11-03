@@ -117,4 +117,4 @@ if user_input:
     st.session_state["ai_messages"].append({"role": "assistant", "content": reply})
     
 
-    st.rerun()
+
