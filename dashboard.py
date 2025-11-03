@@ -314,7 +314,9 @@ with col1:
         ai_explanation = response.choices[0].message.content
         st.markdown(f"**🤖 Why this cost?** {ai_explanation}")
 
+
 # COLUMN 2 — AI Assistant Chat
+
 with col2:
     st.subheader("🤖 AI Assistant Chat")
 
@@ -334,6 +336,7 @@ with col2:
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 
+ 
     for msg in st.session_state["messages"][-10:]:  
         role, content = msg["role"], msg["content"]
         if role == "user":
@@ -343,49 +346,57 @@ with col2:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.form(key="chat_form", clear_on_submit=True):
-        user_input = st.text_input("💬 You:", placeholder="Ask me about your EV data or predictions...")
-        ask = st.form_submit_button("Ask")
 
-
-    if st.button("🧹 Clear Chat", key="clear_chat_btn"):
-        st.session_state["messages"] = []
-        st.rerun()
-
+    user_input = st.text_input("💬 You:", key="chat_input", placeholder="Ask me about your EV data or predictions...")
+    
+    col_ask, col_clear = st.columns([1, 1])
+    with col_ask:
+        ask = st.button("Ask", key="ask_btn")
+    with col_clear:
+        if st.button("🧹 Clear Chat", key="clear_chat_btn"):
+            st.session_state["messages"] = []
+            st.rerun()
 
     if ask and user_input:
-        # Add user message
-        st.session_state["messages"].append({"role": "user", "content": user_input})
 
-        query_result = ''
-
-
-        with st.spinner("🤔 Thinking..."):
-            try:
-                engine = connect_db()
-                with engine.connect() as conn:
-                    if 'average' in user_input.lower() or 'total' in user_input.lower():
-                        df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
-                        if not df.empty:
-                            query_result = f"Average cost: ${df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
-                        else:
-                            query_result = "No predictions stored yet."
-                    elif 'predict' in user_input.lower():
-                        query_result = "I can provide predictions based on stored or example EV data."
-            except Exception as e:
-                query_result = "Database temporarily unavailable."
-
-
-            messages = [
-                {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
-            ] + st.session_state["messages"][-10:] + [
-                {"role": "user", "content": f"User asked: {user_input}. Data retrieved: {query_result}"}
-            ]
-
-            response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
-            reply = response.choices[0].message.content
-
-
-        st.session_state["messages"].append({"role": "assistant", "content": reply})
+        input_key = f"processed_{hash(user_input)}"
         
+        if input_key not in st.session_state:
+            st.session_state[input_key] = True
+            
+            # Add user message
+            st.session_state["messages"].append({"role": "user", "content": user_input})
 
+            query_result = ''
+
+
+            with st.spinner("🤔 Thinking..."):
+                try:
+                    engine = connect_db()
+                    with engine.connect() as conn:
+                        if 'average' in user_input.lower() or 'total' in user_input.lower():
+                            df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
+                            if not df.empty:
+                                query_result = f"Average cost: ${df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
+                            else:
+                                query_result = "No predictions stored yet."
+                        elif 'predict' in user_input.lower():
+                            query_result = "I can provide predictions based on stored or example EV data."
+                except Exception as e:
+                    query_result = "Database temporarily unavailable."
+
+
+                messages = [
+                    {"role": "system", "content": "You are a smart and friendly EV charging assistant. Keep answers short and clear."}
+                ] + st.session_state["messages"][-10:] + [
+                    {"role": "user", "content": f"User asked: {user_input}. Data retrieved: {query_result}"}
+                ]
+
+                response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+                reply = response.choices[0].message.content
+
+
+            st.session_state["messages"].append({"role": "assistant", "content": reply})
+            
+ 
+            st.rerun()
