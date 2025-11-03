@@ -15,7 +15,8 @@ def connect_db():
     database_url = os.getenv("DATABASE_URL")
     
     if not database_url:
-        database_url = "postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db"
+        st.warning("⚠️ DATABASE_URL not found in environment variables.")
+        return None
     
     engine = create_engine(database_url)
     return engine

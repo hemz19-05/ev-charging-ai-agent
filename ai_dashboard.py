@@ -21,7 +21,8 @@ def get_engine():
     """Create and cache the SQLAlchemy engine."""
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
-        database_url = "postgresql+psycopg2://postgres:Hzz19!#%@localhost:5432/ev_charging_db"
+        st.warning("⚠️ DATABASE_URL not found in environment variables.")
+        return None
     return create_engine(database_url)
 
 @st.cache_resource(show_spinner=False)
