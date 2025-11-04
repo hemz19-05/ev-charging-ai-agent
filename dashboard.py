@@ -272,8 +272,11 @@ with col1:
         }
 
         X = preprocess_input(user_data)
-        prediction = model.predict(X)[0]
-        st.success(f"💰 Estimated Charging Cost: **${prediction:.2f}**")
+
+        prediction_per_kwh = model.predict(X)[0]  # cost per kWh
+        total_cost = prediction_per_kwh * energy  # total = rate × energy consumed
+        st.success(f"💰 Estimated Total Charging Cost: **${total_cost:.2f}** (≈ ${prediction_per_kwh:.3f}/kWh)")
+
 
         try:
             engine = connect_db()
@@ -288,7 +291,7 @@ with col1:
                 data = (
                     distance, energy, duration, capacity, rate,
                     soc_start, soc_end, temp, age, model_choice,
-                    charger_type, user_type, float(prediction)
+                    charger_type, user_type, float(total_cost)
                 )
                 conn.exec_driver_sql(insert_query, data)
                 conn.commit()
@@ -297,11 +300,14 @@ with col1:
             st.warning("⚠️ Could not store prediction in database")
 
         explanation_prompt = f"""
-        Explain in one paragraph why the predicted EV charging cost is ${prediction:.2f}, 
-        given these parameters: duration={duration} hours, energy={energy} kWh, 
-        temperature={temp}°C, vehicle age={age} years, and user type={user_type}.
-        Be clear, concise, and use everyday language.
+        Explain in one paragraph what this EV charging cost prediction means in real-world terms.
+        The model predicted a cost value of ${prediction_per_kwh:.2f} for a session with:
+        duration={duration} hours, energy={energy} kWh, temperature={temp}°C, vehicle age={age} years, and user type={user_type}.
+        Assume typical electricity rates range between $0.15 and $0.40 per kWh.
+        Give a realistic estimate of the total charging cost and explain which factors most likely caused the cost to be higher or lower.
+        Keep it short and easy to understand.
         """
+
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",

@@ -15,7 +15,7 @@ def connect_db():
     database_url = os.getenv("DATABASE_URL")
     
     if not database_url:
-        st.warning("⚠️ DATABASE_URL not found in environment variables.")
+        print("⚠️ DATABASE_URL not found in environment variables.")
         return None
     
     engine = create_engine(database_url)
@@ -57,9 +57,17 @@ def ai_agent_query(user_input):
                     'Energy Consumed (kWh)': 30
                 }
 
+
                 X = preprocess_input(example_data)
-                prediction = model.predict(X)[0]
-                query_result = f'Predicted charging cost for Tesla Model 3: ${prediction:.2f}'
+                energy = example_data['Energy Consumed (kWh)']
+
+                
+                prediction_per_kwh = model.predict(X)[0]  # cost per kWh
+                total_cost = prediction_per_kwh * energy  # total = rate × energy consumed
+                query_result = (
+                        f"Predicted rate: ${prediction_per_kwh:.3f}/kWh, "
+                        f"Estimated total: ${total_cost:.2f}"
+                    )
                 
     except Exception as e:
         query_result = f"Database temporarily unavailable. I can still answer general questions!"
