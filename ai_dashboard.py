@@ -77,7 +77,7 @@ if user_input:
                 if 'average' in user_input.lower() or 'total' in user_input.lower():
                     df = pd.read_sql_query('SELECT * FROM ev_predictions;', conn)
                     if not df.empty:
-                        query_result = f"Average cost: ${df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
+                        query_result = f"Average cost: \\${df['predicted_cost'].mean():.2f}, Total sessions: {len(df)}"
                     else:
                         query_result = "No predictions stored in database yet."
 
@@ -102,7 +102,7 @@ if user_input:
 
                     prediction_per_kwh = model.predict(X)[0]  # cost per kWh
                     total_cost = prediction_per_kwh * energy  # total = rate × energy consumed
-                    st.success(f"💰 Estimated Total Charging Cost: **${total_cost:.2f}** (≈ ${prediction_per_kwh:.3f}/kWh)")
+                    st.success(f"💰 Estimated Total Charging Cost: **\\${total_cost:.2f}** (≈ \\${prediction_per_kwh:.3f}/kWh)")
 
         else:
             query_result = 'Database connection not configured.' 

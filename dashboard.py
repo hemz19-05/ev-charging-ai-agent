@@ -275,7 +275,7 @@ with col1:
 
         prediction_per_kwh = model.predict(X)[0]  # cost per kWh
         total_cost = prediction_per_kwh * energy  # total = rate × energy consumed
-        st.success(f"💰 Estimated Total Charging Cost: **${total_cost:.2f}** (≈ ${prediction_per_kwh:.3f}/kWh)")
+        st.success(f"💰 Estimated Total Charging Cost: **\\${total_cost:.2f}** (≈ \\${prediction_per_kwh:.3f}/kWh)")
 
 
         try:
