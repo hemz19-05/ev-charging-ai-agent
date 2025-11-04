@@ -80,6 +80,8 @@ DATABASE_URL=your_postgres_connection_url
 ### 5️⃣ Run the Streamlit app
 streamlit run dashboard.py
 
+---
+
 ### 🌐 Deployment
 
 This project is deployed on Render, using:
@@ -89,6 +91,8 @@ render.yaml → Deployment configuration
 runtime.txt → Specifies Python version (3.10.14)
 
 .gitignore → Ensures no secret or environment files are pushed
+
+---
 
 ### 📊 Example Prediction
 
@@ -102,6 +106,7 @@ Temperature: 36°C
 Output:
 💰 Estimated Total Charging Cost: $16.63 (≈ $0.37/kWh)
 
+---
 
 ##💡 Future Improvements
 
@@ -110,7 +115,11 @@ Visualize prediction history directly in the dashboard
 Deploy the AI Assistant as an API endpoint (for web/mobile apps)
 Integrate LangChain for conversational memory
 
+---
+
 ### This repository is for learning and portfolio demonstration only.Reuse of code is not permitted without permission.
+
+---
 
 ###👩‍💻 Author
 
