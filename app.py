@@ -21,8 +21,11 @@ def predict():
         data = request.get_json()
 
         X = preprocess_input(data)
-        prediction = model.predict(X)[0]
-        return jsonify({'prediction': float(prediction)})
+
+        prediction_per_kwh = model.predict(X)[0]
+        total_cost = prediction_per_kwh * data.get('Energy Consumed (kWh)', 0)
+        return jsonify({'cost_per_kwh': float(prediction_per_kwh), 'total_cost': float(total_cost)})
+
     
     except Exception as e:
          return jsonify({'error': str(e)})
