@@ -59,25 +59,25 @@ It also stores user prediction data in a **PostgreSQL database** for analytics a
 
 ## 🛠️ Setup & Run Locally  
 
-### 1️⃣ Clone the repository  
+1️⃣ Clone the repository  
 ```bash
 git clone https://github.com/hemz19-05/ev-charging-ai-agent.git
 cd ev-charging-ai-agent
 
-### 2️⃣ Create and activate a virtual environment
+2️⃣ Create and activate a virtual environment
 python -m venv .venv
 source .venv/bin/activate      # (Mac/Linux)
 .venv\Scripts\activate         # (Windows)
 
-### 3️⃣ Install dependencies
+3️⃣ Install dependencies
 pip install -r requirements.txt
 
-### 4️⃣ Add your environment variables
+4️⃣ Add your environment variables
 Create a .env file in the root folder:
 OPENAI_API_KEY=your_openai_api_key_here
 DATABASE_URL=your_postgres_connection_url
 
-### 5️⃣ Run the Streamlit app
+5️⃣ Run the Streamlit app
 streamlit run dashboard.py
 
 ---
@@ -91,6 +91,8 @@ render.yaml → Deployment configuration
 runtime.txt → Specifies Python version (3.10.14)
 
 .gitignore → Ensures no secret or environment files are pushed
+
+Try it out here: https://ev-charging-ai-agent.onrender.com/
 
 ---
 
